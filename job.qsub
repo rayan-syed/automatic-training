@@ -1,0 +1,19 @@
+#!/bin/bash -l
+
+# Specify the project and resource allocation
+#$ -P tianlabdl
+#$ -l h_rt=1:00:00
+#$ -l gpus=1
+
+# Load the required Python module and activate the virtual environment
+module load python3/3.10.12
+source .venv/bin/activate
+
+# Define the checkpoint directory
+CHECKPOINT_DIR= /projectnb/tianlabdl/rsyed/automatic-training/checkpoints
+
+# Define the checkpoint file
+CHECKPOINT_FILE=$CHECKPOINT_DIR/checkpoint.pth
+
+# Run python file
+python train.py --checkpoint_file $CHECKPOINT_FILE --max_time 12h
