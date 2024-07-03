@@ -2,12 +2,12 @@
 
 # Specify the project and resource allocation
 #$ -P tianlabdl
-#$ -j y
 #$ -l gpus=1
+#$ -l gpu_c=3.5
 
-# Load the required Python module and activate the virtual environment
-module load python3/3.10.12
+# Load the required Python module and activate environment
+module load python3
 source .venv/bin/activate
 
-# Run python file
+# Start training
 python train.py

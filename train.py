@@ -1,4 +1,5 @@
 import os
+import sys  
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -29,6 +30,7 @@ def save_checkpoint(state, filepath):
 
 def train():
     print("Starting training...")
+    sys.stdout.flush()
     
     # Specify checkpoint file here
     checkpoint_directory = "/projectnb/tianlabdl/rsyed/automatic-training/checkpoints"
@@ -65,6 +67,7 @@ def train():
             optimizer.step()
         
         print(f"Epoch {epoch} completed")
+        sys.stdout.flush()
 
         # Save checkpoint ATOMICALLY every epoch,
         temp_file = f"{checkpoint_directory}/temp.pt"
