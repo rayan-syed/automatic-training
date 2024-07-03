@@ -33,7 +33,7 @@ def train():
     sys.stdout.flush()
     
     # Specify checkpoint file here
-    checkpoint_directory = "/projectnb/tianlabdl/rsyed/automatic-training/checkpoints"
+    checkpoint_directory = "/projectnb/tianlabdl/rsyed/automatic-training/data/checkpoints"
     checkpoint_file = f"{checkpoint_directory}/checkpoint.pt"
     
     # Define transformations
