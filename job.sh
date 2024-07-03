@@ -1,16 +1,14 @@
 #!/bin/bash
 
-NUM_JOBS = 10
+# Note how many times you want job to repeat
+NUM_JOBS=3
 
-timestamp=$(date +"%Y%m%d%H%M%S%N")  # %N for nanoseconds
-
-BASE_JOB_NAME="automatic_training_${timestamp}"
-
-# Submit the initial job
-job_id=$(qsub -N "${BASE_JOB_NAME}" -j y -o "/projectnb/tianlabdl/rsyed/automatic-training/logs/${BASE_JOB_NAME}.qlog" "job.qsub")
+BASE_JOB_NAME="automatic_training"
 
 # Submit subsequent jobs with dependencies
-for i in $(seq 2 $NUM_JOBS); do
+for i in $(seq 1 $NUM_JOBS); do
     job_name="${BASE_JOB_NAME}_${i}"
-    job_id=$(qsub -N $job_name -hold_jid $job_id -j y -o "/projectnb/tianlabdl/rsyed/automatic-training/logs/${BASE_JOB_NAME}.qlog" "job.qsub")
+    previous_job_name="${BASE_JOB_NAME}_$((i-1))"
+    echo "starting job ${i}:"
+    qsub -N $job_name -hold_jid $previous_job_name -j y -o "/projectnb/tianlabdl/rsyed/automatic-training/logs/${BASE_JOB_NAME}_${i}.qlog" "job.qsub"
 done
