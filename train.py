@@ -1,5 +1,4 @@
 import os
-import time
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -28,8 +27,12 @@ def load_checkpoint(filepath):
 def save_checkpoint(state, filepath):
     torch.save(state, filepath)
 
-def train(checkpoint_file, max_time):
-    start_time = time.time()
+def train():
+    print("Starting training...")
+    
+    # Specify checkpoint file here
+    checkpoint_directory = "/projectnb/tianlabdl/rsyed/automatic-training/checkpoints"
+    checkpoint_file = f"{checkpoint_directory}/checkpoint.pt"
     
     # Define transformations
     transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
@@ -63,23 +66,12 @@ def train(checkpoint_file, max_time):
         
         print(f"Epoch {epoch} completed")
 
-        # Save checkpoint periodically
-        if epoch % 1 == 0:
-            save_checkpoint({'epoch': epoch, 'model_state': model.state_dict(), 'optimizer_state': optimizer.state_dict()}, checkpoint_file)
-
-        # Check if max_time has been reached
-        if time.time() - start_time > max_time:
-            break
-    
-    # Save checkpoint at the end of the job
-    save_checkpoint({'epoch': epoch, 'model_state': model.state_dict(), 'optimizer_state': optimizer.state_dict()}, checkpoint_file)
+        # Save checkpoint ATOMICALLY every epoch,
+        temp_file = f"{checkpoint_directory}/temp.pt"
+        save_checkpoint({'epoch': epoch, 'model_state': model.state_dict(), 'optimizer_state': optimizer.state_dict()}, temp_file)
+        os.replace(temp_file,checkpoint_file)   # Replace old checkpoint only after new one is fully saved
+        if os.path.exists(temp_file):     
+            os.remove(temp_file)
 
 if __name__ == "__main__":
-    import argparse
-
-    parser = argparse.ArgumentParser(description='Training script with checkpointing')
-    parser.add_argument('--checkpoint_file', type=str, required=True, help='Path to the checkpoint file')
-    parser.add_argument('--max_time', type=float, required=True, help='Maximum time to run the script in seconds')
-    args = parser.parse_args()
-
-    train(args.checkpoint_file, args.max_time)
+    train()
