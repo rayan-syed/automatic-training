@@ -64,10 +64,10 @@ Using batch jobs for training may cause some errors/irritations in the SCC. The 
 If a job is terminated/runs out of time while a checkpoint is being saved, the checkpoint file can be corrupted. This fatal error can be avoided through atomic saving of checkpoints. It is highly recommended to save checkpoints in a similar manner to this code snippet from `train.py`:
 ```
 temp_file = f"{checkpoint_directory}/temp.pt"
-        save_checkpoint({'epoch': epoch, 'model_state': model.state_dict(), 'optimizer_state': optimizer.state_dict()}, temp_file)
-        os.replace(temp_file,checkpoint_file)   # Replace old checkpoint only after new one is fully saved
-        if os.path.exists(temp_file):     
-            os.remove(temp_file)
+save_checkpoint({'epoch': epoch, 'model_state': model.state_dict(), 'optimizer_state': optimizer.state_dict()}, temp_file)
+os.replace(temp_file,checkpoint_file)   # Replace old checkpoint only after new one is fully saved
+if os.path.exists(temp_file):     
+    os.remove(temp_file)
 ```
 This ensures that should corruption occur, it would happen with the temporary file rather than the actual checkpoint file. A cleanup is also performed to remove temporary file after it replaces the actual checkpoint file.
 
