@@ -61,7 +61,7 @@ The qsub file is very standard. Basic specifics for the job are specified at the
 Using batch jobs for training may cause some errors/irritations in the SCC. The following propose solutions to some of these irritations:
 
 ### Atomically Saving Checkpoints
-If a job is terminated/runs out of time while a checkpoint is being saved, the checkpoint file can be corrupted. This fatal error can be avoided through atomic saving of checkpoints. It is highly recommended to save checkpoints in a similar manner to this code snippet from `train.py`
+If a job is terminated/runs out of time while a checkpoint is being saved, the checkpoint file can be corrupted. This fatal error can be avoided through atomic saving of checkpoints. It is highly recommended to save checkpoints in a similar manner to this code snippet from `train.py`:
 ```
 temp_file = f"{checkpoint_directory}/temp.pt"
         save_checkpoint({'epoch': epoch, 'model_state': model.state_dict(), 'optimizer_state': optimizer.state_dict()}, temp_file)
@@ -70,3 +70,13 @@ temp_file = f"{checkpoint_directory}/temp.pt"
             os.remove(temp_file)
 ```
 This ensures that should corruption occur, it would happen with the temporary file rather than the actual checkpoint file. A cleanup is also performed to remove temporary file after it replaces the actual checkpoint file.
+
+### Flushing Stdout to Log File
+Usually in the SCC, print statements within the python file are pushed to the log file after a file has finished running. In this situation, there is a change that the Python file does not come to an end and just gets ended by the system when the sub-job comes to an end. While the checkpoint file will be there, one may want to see any print statements that were logged along the way. One can simply flush stdout so that the text appears in the log file immediately rather than at the end (if not never). This is an example of how it was done in `train.py`:
+```
+print(f"Epoch {epoch} completed")
+sys.stdout.flush()
+```
+In this case, at the end of each epoch, stdout is flushed, forcing the epoch completion print statement to be instantly reflected in the log file. While this is not necessary at all, it is just something I personally found helpful since I like to watch logs as training scripts execute.
+
+Hopefully, this repository helps you with running long training scripts automatically with minimal user interference. If you have any further questions or spot any errors, please contact at me at rsyed@bu.edu.
