@@ -1,0 +1,10 @@
+#!/bin/bash -l
+#$ -P tianlabdl
+#$ -l h_rt=1:00:00
+
+# Append each log to end of main log, remove after append
+for i in $(seq 1 $jobs); do
+    log="${mainlog}_${i}.qlog"
+    cat $log >> "${mainlog}.qlog"
+    rm -f $log
+done
