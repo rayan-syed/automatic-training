@@ -11,7 +11,7 @@ The job.sh file looks like this:
 
 # Total Training Time = NUM_JOB * HOURS_PER_JOB
 NUM_JOBS=3
-HOURS_PER_JOB=1 
+HOURS_PER_JOB=12
 LOG_DIRECTORY="/projectnb/tianlabdl/rsyed/automatic-training/logs/"
 
 BASE_JOB_NAME="automatic_training"
@@ -20,9 +20,11 @@ BASE_JOB_NAME="automatic_training"
 for i in $(seq 1 $NUM_JOBS); do
     job_name="${BASE_JOB_NAME}_${i}"
     previous_job_name="${BASE_JOB_NAME}_$((i-1))"
-    echo "Starting job ${i}:"
     qsub -hold_jid $previous_job_name -j y -N $job_name -o "${LOG_DIRECTORY}${BASE_JOB_NAME}_${i}.qlog" -l h_rt=${HOURS_PER_JOB}:00:00 "job.qsub"
 done
+
+# Append all log files in the end
+qsub -hold_jid "${BASE_JOB_NAME}_${NUM_JOBS}" -j y -N "append_${BASE_JOB_NAME}" -o "${LOG_DIRECTORY}append.qlog" -v mainlog="${LOG_DIRECTORY}${BASE_JOB_NAME}" -v jobs=$NUM_JOBS "append.qsub"
 ```
 This file has been designed in a user-friendly manner so that the user can submit a large amount of jobs, each with a set runtime. All jobs submitted will not start until the previous job has been completed. This essentially creates many dependent sub-jobs, effectively simulating one large training job.
 
@@ -37,6 +39,8 @@ Note that running shell scripts frequently causes permission errors in the SCC. 
 `
 chmod +x ./job.sh
 `
+
+It is also important to note that initially, there will be a log file for each sub-job that is run. For example, job_1.qlog and job_2.qlog would be present if NUM_JOBS=2. Once everything is done running, these will automatically merge into one singular job.qlog file through the use of `append.qsub` at the end of the job.sh file. Another log file, append.qlog will be created just in case something goes wrong, but feel free to delete it if it is empty.
 
 ### Job.qsub
 The job.qsub file looks like this:
